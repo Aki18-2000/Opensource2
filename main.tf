@@ -120,7 +120,7 @@ resource "aws_instance" "httpd_instance" {
               EOF
 
   tags = {
-    Name = "HttpdInstanceaki"
+    Name = "HttpdInstanceaki2"
   }
 }
 
