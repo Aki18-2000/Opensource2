@@ -99,7 +99,7 @@ resource "aws_security_group" "allow_ssh_http" {
 }
 
 resource "aws_instance" "openprojectaki" {
-  ami           = "ami-08b5b3a93ed654d19"  # Updated AMI ID
+  ami           = "ami-04b4f1a9cf54c11d0"  # Direct AMI ID
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.privateaki.id
   vpc_security_group_ids = [aws_security_group.allow_ssh_http.id]
@@ -110,7 +110,6 @@ resource "aws_instance" "openprojectaki" {
               sudo service docker start
               sudo systemctl enable docker
               sudo usermod -aG docker ec2-user
-              docker --version
               sudo docker pull openproject/community:12.5.6
               sudo docker run -d -p 80:80 openproject/community:12.5.6
               EOF
@@ -121,7 +120,8 @@ resource "aws_instance" "openprojectaki" {
 }
 
 resource "aws_lb" "app_lb" {
-  name               =
+  name               = "app-lb"
+  internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.allow_ssh_http.id]
   subnets            = [aws_subnet.public_aki.id, aws_subnet.public_baki.id]
