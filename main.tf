@@ -99,8 +99,8 @@ resource "aws_security_group" "allow_ssh_http" {
 }
 
 resource "aws_instance" "httpd_instance" {
-  ami           = "ami-04b4f1a9cf54c11d0"  # Direct AMI ID
-  instance_type = "t2.micro"
+  ami           = "ami-08b5b3a93ed654d19"  # Direct AMI ID
+  instance_type = "t3.medium"
   subnet_id     = aws_subnet.public_aki.id  # Updated to public subnet
   vpc_security_group_ids = [aws_security_group.allow_ssh_http.id]
   key_name      = "Akshaya19"  # Use the existing key pair
