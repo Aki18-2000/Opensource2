@@ -98,29 +98,34 @@ resource "aws_security_group" "allow_ssh_http" {
   }
 }
 
-resource "aws_instance" "openprojectaki" {
-  ami           = "ami-08b5b3a93ed654d19"  # Direct AMI ID
+resource "aws_instance" "httpd_instance" {
+  ami           = "ami-04b4f1a9cf54c11d0"  # Direct AMI ID
   instance_type = "t2.micro"
-  subnet_id     = aws_subnet.privateaki.id
+  subnet_id     = aws_subnet.public_aki.id  # Updated to public subnet
   vpc_security_group_ids = [aws_security_group.allow_ssh_http.id]
 
   user_data = <<-EOF
               #!/bin/bash
-              sudo yum install docker -y
-              sudo service docker start
+              # Create a new user 'Aki' and set the password
+              useradd Aki
+              echo "Aki:8055" | chpasswd
+
+              # Install Docker and run a simple HTTP server
+              sudo apt-get update
+              sudo apt-get install -y docker.io
+              sudo systemctl start docker
               sudo systemctl enable docker
-              sudo usermod -aG docker ec2-user
               sudo docker pull openproject/community:12.5.6
               sudo docker run -d -p 80:80 openproject/community:12.5.6
               EOF
 
   tags = {
-    Name = "OpenProjectInstanceaki"
+    Name = "HttpdInstanceaki"
   }
 }
 
-resource "aws_lb" "app_lb" {
-  name               = "app-lb"
+resource "aws_lb" "new_app_lb" {
+  name               = "new-app-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.allow_ssh_http.id]
@@ -129,8 +134,8 @@ resource "aws_lb" "app_lb" {
   enable_deletion_protection = false
 }
 
-resource "aws_lb_target_group" "app_tg" {
-  name     = "app-tg"
+resource "aws_lb_target_group" "new_app_tg" {
+  name     = "new-app-tg"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
@@ -145,19 +150,19 @@ resource "aws_lb_target_group" "app_tg" {
   }
 }
 
-resource "aws_lb_listener" "app_lb_listener" {
-  load_balancer_arn = aws_lb.app_lb.arn
+resource "aws_lb_listener" "new_app_lb_listener" {
+  load_balancer_arn = aws_lb.new_app_lb.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.app_tg.arn
+    target_group_arn = aws_lb_target_group.new_app_tg.arn
   }
 }
 
-resource "aws_lb_target_group_attachment" "app_tg_attachment" {
-  target_group_arn = aws_lb_target_group.app_tg.arn
-  target_id        = aws_instance.openprojectaki.id
+resource "aws_lb_target_group_attachment" "new_app_tg_attachment" {
+  target_group_arn = aws_lb_target_group.new_app_tg.arn
+  target_id        = aws_instance.httpd_instance.id
   port             = 80
 }
