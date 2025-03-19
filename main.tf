@@ -103,10 +103,11 @@ resource "aws_instance" "httpd_instance" {
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.public_aki.id  # Updated to public subnet
   vpc_security_group_ids = [aws_security_group.allow_ssh_http.id]
+  key_name      = "Akshaya19"  # Use the existing key pair
 
   user_data = <<-EOF
               #!/bin/bash
-              # Install Docker and run a simple HTTP server
+              # Install Docker and run OpenProject
               sudo apt-get update
               sudo apt-get install -y docker.io
               sudo systemctl start docker
@@ -120,7 +121,6 @@ resource "aws_instance" "httpd_instance" {
   }
 }
 
-# Changed ALB name to avoid conflict
 resource "aws_lb" "updated_app_lb" {
   name               = "updated-app-lb"
   internal           = false
@@ -131,7 +131,6 @@ resource "aws_lb" "updated_app_lb" {
   enable_deletion_protection = false
 }
 
-# Changed TG name to avoid conflict
 resource "aws_lb_target_group" "updated_app_tg" {
   name     = "updated-app-tg"
   port     = 80
