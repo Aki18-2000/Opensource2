@@ -124,8 +124,9 @@ resource "aws_instance" "httpd_instance" {
   }
 }
 
-resource "aws_lb" "new_app_lb" {
-  name               = "new-app-lb"
+# Changed ALB name to avoid conflict
+resource "aws_lb" "updated_app_lb" {
+  name               = "updated-app-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.allow_ssh_http.id]
@@ -134,8 +135,9 @@ resource "aws_lb" "new_app_lb" {
   enable_deletion_protection = false
 }
 
-resource "aws_lb_target_group" "new_app_tg" {
-  name     = "new-app-tg"
+# Changed TG name to avoid conflict
+resource "aws_lb_target_group" "updated_app_tg" {
+  name     = "updated-app-tg"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
@@ -150,19 +152,19 @@ resource "aws_lb_target_group" "new_app_tg" {
   }
 }
 
-resource "aws_lb_listener" "new_app_lb_listener" {
-  load_balancer_arn = aws_lb.new_app_lb.arn
+resource "aws_lb_listener" "updated_app_lb_listener" {
+  load_balancer_arn = aws_lb.updated_app_lb.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.new_app_tg.arn
+    target_group_arn = aws_lb_target_group.updated_app_tg.arn
   }
 }
 
-resource "aws_lb_target_group_attachment" "new_app_tg_attachment" {
-  target_group_arn = aws_lb_target_group.new_app_tg.arn
+resource "aws_lb_target_group_attachment" "updated_app_tg_attachment" {
+  target_group_arn = aws_lb_target_group.updated_app_tg.arn
   target_id        = aws_instance.httpd_instance.id
   port             = 80
 }
