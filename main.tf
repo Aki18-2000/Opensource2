@@ -105,6 +105,7 @@ resource "aws_instance" "openprojectaki" {
   vpc_security_group_ids = [aws_security_group.allow_ssh_http.id]
 
   user_data = <<-EOF
+              #!/bin/bash
               sudo yum install docker -y
               sudo service docker start
               sudo systemctl enable docker
